@@ -1,4 +1,5 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_login_logout/pages/home_page.dart';
 import 'package:firebase_login_logout/reusable_widgets/reusable_widget.dart';
@@ -7,7 +8,6 @@ import 'package:icons_plus/icons_plus.dart';
 import '../untils/theme.dart';
 import '../widgets/custom_scaffold.dart';
 import 'signin_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -22,6 +22,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController _emailTextController = TextEditingController();
   TextEditingController _userNameTextController = TextEditingController();
   bool agreePersonalData = true;
+
+  Future<bool> checkUserExists(String email) async {
+    try {
+      // Truy cập vào collection "Users" và lấy thông tin của tài khoản có email tương ứng
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("Users")
+          .where('email', isEqualTo: email)
+          .get();
+
+      // Kiểm tra nếu có bất kỳ tài khoản nào có cùng email với email truyền vào
+      return querySnapshot.docs.isNotEmpty;
+    } catch (error) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('The email address is already in use by another account.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return false;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
@@ -195,32 +227,68 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: firebaseUIButton(context, "Sign Up", () {
-                          FirebaseAuth.instance
-                              .createUserWithEmailAndPassword(
-                              email: _emailTextController.text,
-                              password: _passwordTextController.text)
-                              .then((userCredential) {
-                            FirebaseFirestore.instance
-                                .collection("Users")
-                                .doc(userCredential.user!.email)
-                                .set({
-                              'username': _emailTextController.text.split('@')[0], // Added comma after this line
-                              'SĐT': '',
-                            })
-                                .then((_) {
-                              print("Created New Account");
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => HomePage()),
-                              );
+                            FirebaseAuth.instance
+                                .createUserWithEmailAndPassword(
+                                email: _emailTextController.text,
+                                password: _passwordTextController.text)
+                                .then((userCredential) {
+                              FirebaseFirestore.instance
+                                  .collection("Users")
+                                  .doc(userCredential.user!.email)
+                                  .set({
+                                'username': _userNameTextController.text,
+                                'phone': '',
+                                'sex': '',
+                                'address': '',
+                              })
+                                  .then((_) {
+                                print("Created New Account");
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => HomePage()),
+                                );
+                              })
+                                  .catchError((error) {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Error'),
+                                      content: Text('Enter missing information or the email address is already used by another account.'),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              });
                             })
                                 .catchError((error) {
-                              print("Error ${error.toString()}");
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Error'),
+                                    content: Text('Enter missing information or the email address is already used by another account.'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             });
-                          })
-                              .catchError((error) {
-                            print("Error ${error.toString()}");
-                          });
+
                         }),
                       ),
                       const SizedBox(

@@ -1,9 +1,8 @@
-
-import 'package:firebase_login_logout/pages/text_box.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import '../components/mydrawer.dart';
+import '../widgets/textbox.dart';
 
 
 class ProfilePage extends StatefulWidget {
@@ -64,8 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile Page'),
-        backgroundColor: Colors.grey[900],
+        title: Text('Profile Page',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 28),),
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance.collection("Users").doc(currentUser.email).snapshots(),
@@ -76,37 +74,54 @@ class _ProfilePageState extends State<ProfilePage> {
             return ListView(
               children: [
                 SizedBox(height: 50,),
-                Icon(
-                  Icons.person,
-                  size: 70,
+                Container(
+                  alignment: Alignment.center,
+                  child: CircleAvatar(
+                    radius: 35,
+                    child: Icon(
+                      Icons.person,
+                      size: 60,
+                      color: Colors.black38,
+                    ),
+                  ),
                 ),
-
                 SizedBox(height: 10,),
-
                 Text(
                   currentUser.email!,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[700]),
+                  style: TextStyle(color: Colors.grey[700],fontWeight: FontWeight.bold,fontSize: 16),
                 ),
-
+                SizedBox(height: 20,),
                 Padding(
                   padding: EdgeInsets.only(left: 25),
                   child: Text(
                     'My Details',
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: TextStyle(fontSize:18,fontWeight: FontWeight.bold),
                   ),
                 ),
-
                 MyTextBox(
                   text: userData['username'],
-                  sectionName: 'username',
+                  iconData: Icons.verified_user,
+                  sectionName: 'Username',
                   onPressed: () => editField('username'),
                 ),
-
                 MyTextBox(
-                  text: userData['SĐT'],
-                  sectionName: 'SĐT',
-                  onPressed: () => editField('SĐT'),
+                  text: userData['phone'],
+                  iconData: Icons.phone,
+                  sectionName: 'Phone',
+                  onPressed: () => editField('phone'),
+                ),
+                MyTextBox(
+                  text: userData['sex'],
+                  iconData: Icons.add,
+                  sectionName: 'Sex',
+                  onPressed: () => editField('sex'),
+                ),
+                MyTextBox(
+                  text: userData['address'],
+                  iconData: Icons.location_on,
+                  sectionName: 'Address',
+                  onPressed: () => editField('address'),
                 )
 
               ],

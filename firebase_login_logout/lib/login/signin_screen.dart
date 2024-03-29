@@ -1,4 +1,5 @@
 
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_login_logout/pages/home_page.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import '../untils/theme.dart';
 import '../widgets/custom_scaffold.dart';
 import 'reset_password.dart';
 import 'signup_screen.dart';
+
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -171,7 +173,23 @@ class _SignInScreenState extends State<SignInScreen> {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => HomePage()));
                   }).onError((error, stackTrace) {
-                    print("Error ${error.toString()}");
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Error'),
+                          content: Text('Incorrect account or password.'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   });
                 }),
                       const SizedBox(
